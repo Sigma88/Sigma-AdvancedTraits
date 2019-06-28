@@ -57,10 +57,10 @@ namespace SigmaAdvancedTraitsPlugin
                 {
                     // Maneuver Execution Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>Maneuver Execution</color>",
+                    "<color=#BADA55>Maneuver Execution</color>",
                     // Remote Control Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>Remote Control</color>"
+                    "<color=#BADA55>Remote Control</color>"
                 }
             },
             {
@@ -69,10 +69,10 @@ namespace SigmaAdvancedTraitsPlugin
                 {
                     // Scientist Trait 0 Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>AdvTraits[\"Scientist\"][0]</color>",
+                    "<color=#55BADA>AdvTraits[\"Scientist\"][0]</color>",
                     // Scientist Trait 1 Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>AdvTraits[\"Scientist\"][1]</color>"
+                    "<color=#55BADA>AdvTraits[\"Scientist\"][1]</color>"
                 }
             }
         };
