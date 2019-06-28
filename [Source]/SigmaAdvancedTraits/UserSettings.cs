@@ -39,7 +39,7 @@ namespace SigmaAdvancedTraitsPlugin
             {
                 UnityEngine.Debug.Log(Debug.Tag + " WARNING: Missing file => " + folder + file + ".cfg");
 
-                File.WriteAllLines(folder + file + ".cfg", new[] { nodeName + " {}" });
+                File.WriteAllLines(folder + file + ".cfg", new[] { nodeName + "\r\n{\r\n}" });
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace SigmaAdvancedTraitsPlugin
             {
                 UnityEngine.Debug.Log(Debug.Tag + " WARNING: Missing node => " + folder + file + "/" + nodeName);
 
-                File.AppendAllText(folder + file + ".cfg", "\r\n" + nodeName + " {}");
+                File.AppendAllText(folder + file + ".cfg", "\r\n" + nodeName + "\r\n{\r\n}");
             }
         }
 
