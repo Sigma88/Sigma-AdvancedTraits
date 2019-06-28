@@ -45,8 +45,10 @@ namespace SigmaAdvancedTraitsPlugin
         bool burn = false;
         bool slow = false;
         double throttle = 0;
+        double overshoot = 0;
         double UT = 0;
         double dV = 0;
+
         ProtoCrewMember pilot = null;
 
 
@@ -62,6 +64,7 @@ namespace SigmaAdvancedTraitsPlugin
             burn = false;
             slow = false;
             throttle = 0;
+            overshoot = 0;
             dV = 0;
             UT = 0;
             pilot = null;
@@ -105,7 +108,7 @@ namespace SigmaAdvancedTraitsPlugin
                         for (int i = 0; i < n; i++)
                         {
                             Debug.Log("AutoPilot.CheckPilot", "crew[" + i + "] = " + crew[i]);
-                            if (crew[i].careerLog.HasEntry("AdvancedTrait_ManualPilot"))
+                            if (crew[i].careerLog.HasEntry("Training1", AdvancedTraitsButtons.AdvTraits["Pilot"][0]))
                             {
                                 Fields["autoPilot"].guiActive = Fields["pilotName"].guiActive = true;
 
@@ -167,6 +170,17 @@ namespace SigmaAdvancedTraitsPlugin
             {
                 Debug.Log("AutoPilot.OnStart", "Debug.debug = " + Debug.debug);
                 Fields["debug"].guiActive = debug = Debug.debug;
+            }
+            else
+            {
+                Fields["debug"].guiActiveEditor =
+                Fields["track"].guiActiveEditor =
+                Fields["precise"].guiActiveEditor =
+                Fields["multinode"].guiActiveEditor =
+                Fields["pilotName"].guiActiveEditor =
+                Fields["autoPilot"].guiActiveEditor =
+                Fields["ignition"].guiActiveEditor =
+                Fields["cutOff"].guiActiveEditor = false;
             }
 
             base.OnStart(state);
@@ -235,8 +249,16 @@ namespace SigmaAdvancedTraitsPlugin
                                         autoPilot = false;
                                         Debug.Log("AutoPilot.OnUpdate", "Last maneuver node, turn off autopilot.");
                                     }
-                                    Reset();
-                                    return;
+
+                                    if (precise || overshoot > 0.25)
+                                    {
+                                        Reset();
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        overshoot += dT;
+                                    }
                                 }
 
                                 dV += ddV;
