@@ -14,7 +14,6 @@ namespace SigmaAdvancedTraitsPlugin
     {
         void Start()
         {
-            UnityEngine.Debug.Log("SigmaLog: ListItem_enlisted = " + GameObject.Find("ListItem_enlisted"));
             CrewListItem[] items = Resources.FindObjectsOfTypeAll<CrewListItem>();
             for (int i = 0; i < items?.Length; i++)
             {
