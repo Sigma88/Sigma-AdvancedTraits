@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AdvancedRepair.cs" />
+    <Compile Include="AdvancedTrainingLabel.cs" />
     <Compile Include="Buttons.cs" />
     <Compile Include="DebugLogger.cs" />
     <Compile Include="GameEvents.cs" />
