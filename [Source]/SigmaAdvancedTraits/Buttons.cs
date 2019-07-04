@@ -31,7 +31,7 @@ namespace SigmaAdvancedTraitsPlugin
 
         internal static Dictionary<string, string[]> AdvTraits = new Dictionary<string, string[]>
         {
-            { "Engineer", new[] { "Engineer0", "Engineer1" } },
+            { "Engineer", new[] { "PartRepair", "Networking" } },
             { "Pilot", new[] { "ManeuverExecution", "RemoteControl" } },
             { "Scientist", new[] { "Scientist0", "Scientist1" } }
         };
@@ -42,12 +42,12 @@ namespace SigmaAdvancedTraitsPlugin
                 "Engineer",
                 new[]
                 {
-                    // Engineer Trait 0 Tooltip
+                    // Engineer PartRepair Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>AdvTraits[\"Engineer\"][0]</color>",
-                    // Engineer Trait 1 Tooltip
+                    "<color=#989898>Part Repair</color>",
+                    // Engineer Networking Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#989898>AdvTraits[\"Engineer\"][1]</color>"
+                    "<color=#989898>Networking</color>"
                 }
             },
             {
@@ -82,22 +82,22 @@ namespace SigmaAdvancedTraitsPlugin
                 "Engineer",
                 new[]
                 {
-                    // Engineer Trait0 Description
+                    // Engineer PartRepair Description
                     "After this training, the engineer will be able\n" +
-                    "to do something.\n\n" +
+                    "to repair broken parts.\n\n" +
                     "<color=#FDD901>Features unlocked by level:</color>\n" +
-                    "<color=#FDD901>Level 2:</color> \n" +
-                    "<color=#FDD901>Level 3:</color> \n" +
-                    "<color=#FDD901>Level 4:</color> \n" +
-                    "<color=#FDD901>Level 5:</color> ",
-                    // Engineer Trait1 Description
+                    "<color=#FDD901>Level 2:</color> Repair Antennas\n" +
+                    "<color=#FDD901>Level 3:</color> Repair Radiators\n" +
+                    "<color=#FDD901>Level 4:</color> Repair Solar Panels\n" +
+                    "<color=#FDD901>Level 5:</color> Repair Vessel",
+                    // Engineer Networking Description
                     "After this training, the engineer will be able\n" +
-                    "to do something.\n\n" +
+                    "to enhance the CommNet system.\n\n" +
                     "<color=#FDD901>Features unlocked by level:</color>\n" +
-                    "<color=#FDD901>Level 2:</color> \n" +
-                    "<color=#FDD901>Level 3:</color> \n" +
-                    "<color=#FDD901>Level 4:</color> \n" +
-                    "<color=#FDD901>Level 5:</color> "
+                    "<color=#FDD901>Level 2:</color> Enable Ground Stations\n" +
+                    "<color=#FDD901>Level 3:</color> Upgrade Ground Stations\n" +
+                    "<color=#FDD901>Level 4:</color> Track Ground Stations\n" +
+                    "<color=#FDD901>Level 5:</color> Add Ground Stations"
                 }
             },
             {
