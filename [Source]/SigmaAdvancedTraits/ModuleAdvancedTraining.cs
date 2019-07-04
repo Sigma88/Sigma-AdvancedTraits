@@ -1,6 +1,6 @@
 ﻿namespace SigmaAdvancedTraitsPlugin
 {
-    internal class AdvancedTraining : PartModule
+    internal class ModuleAdvancedTraining : PartModule
     {
         [KSPField(guiName = "<color=#FDD901><b>AdvancedTraining</b></color>", guiActive = false, guiActiveUnfocused = false, unfocusedRange = 2000)]
         string advancedTrainingLabel = "";
