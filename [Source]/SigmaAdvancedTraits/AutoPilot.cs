@@ -27,7 +27,7 @@ namespace SigmaAdvancedTraitsPlugin
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "Pilot")]
         public string pilotName = "";
 
-        [UI_Toggle(disabledText = "<color=#FF0000>Disabled</color>", enabledText = "<color=#00FF00>Enabled</color>")]
+        [UI_Toggle(disabledText = "<color=#FFFFFF>Available</color>", enabledText = "<color=#8888FF>Engaged</color>")]
         [KSPField(isPersistant = false, guiActive = false, guiActiveEditor = false, guiName = "<color=#BADA55>Execute Maneuver</color>")]
         public bool autoPilot = false;
 
@@ -41,6 +41,7 @@ namespace SigmaAdvancedTraitsPlugin
 
 
         // Parameters
+        bool fixToggle = false;
         bool active = false;
         bool burn = false;
         bool slow = false;
@@ -69,7 +70,16 @@ namespace SigmaAdvancedTraitsPlugin
             UT = 0;
             pilot = null;
             FlightInputHandler.state.mainThrottle = 0;
+            FixToggle();
             Debug.Log("AutoPilot.Reset", "End");
+        }
+
+        void FixToggle()
+        {
+            fixToggle = false;
+            UI_Toggle autoPilotToggle = (UI_Toggle)Fields["autoPilot"].uiControlFlight;
+            autoPilotToggle.enabledText = "<color=#8888FF>Engaged</color>";
+            autoPilotToggle.disabledText = "<color=#FFFFFF>Available</color>";
         }
 
         void CheckPilot()
@@ -95,33 +105,29 @@ namespace SigmaAdvancedTraitsPlugin
             Debug.Log("AutoPilot.CheckPilot", "vessel = " + vessel + ", activeVessel = " + FlightGlobals.ActiveVessel);
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                Debug.Log("AutoPilot.CheckPilot", "maneuver nodes count = " + vessel?.patchedConicSolver?.maneuverNodes?.Count);
-                if (vessel?.patchedConicSolver?.maneuverNodes?.Count > 0)
+                List<ProtoCrewMember> crew = part?.protoModuleCrew;
+
+                Debug.Log("AutoPilot.CheckPilot", "crew count = " + crew?.Count);
+                if (crew != null)
                 {
-                    List<ProtoCrewMember> crew = part?.protoModuleCrew;
+                    int n = crew.Count;
 
-                    Debug.Log("AutoPilot.CheckPilot", "crew count = " + crew?.Count);
-                    if (crew != null)
+                    for (int i = 0; i < n; i++)
                     {
-                        int n = crew.Count;
-
-                        for (int i = 0; i < n; i++)
+                        Debug.Log("AutoPilot.CheckPilot", "crew[" + i + "] = " + crew[i]);
+                        if (crew[i].careerLog.HasEntry("Training1", AdvancedTraitsButtons.AdvTraits["Pilot"][0]))
                         {
-                            Debug.Log("AutoPilot.CheckPilot", "crew[" + i + "] = " + crew[i]);
-                            if (crew[i].careerLog.HasEntry("Training1", AdvancedTraitsButtons.AdvTraits["Pilot"][0]))
+                            Fields["autoPilot"].guiActive = Fields["pilotName"].guiActive = true;
+
+                            Debug.Log("AutoPilot.CheckPilot", "crew[" + i + "] level = " + crew[i].experienceLevel);
+                            if (pilot == null || pilot.experienceLevel < crew[i].experienceLevel)
                             {
-                                Fields["autoPilot"].guiActive = Fields["pilotName"].guiActive = true;
+                                pilot = crew[i];
+                                pilotName = pilot.name;
 
-                                Debug.Log("AutoPilot.CheckPilot", "crew[" + i + "] level = " + crew[i].experienceLevel);
-                                if (pilot == null || pilot.experienceLevel < crew[i].experienceLevel)
+                                if (pilot.experienceLevel == 5)
                                 {
-                                    pilot = crew[i];
-                                    pilotName = pilot.name;
-
-                                    if (pilot.experienceLevel == 5)
-                                    {
-                                        return;
-                                    }
+                                    return;
                                 }
                             }
                         }
@@ -193,124 +199,154 @@ namespace SigmaAdvancedTraitsPlugin
                 CheckPilot();
                 CheckFeatures();
 
-                Debug.Log("AutoPilot.OnUpdate", "autoPilot = " + autoPilot);
-                if (autoPilot)
+                Debug.Log("AutoPilot.CheckPilot", "maneuver nodes count = " + vessel?.patchedConicSolver?.maneuverNodes?.Count);
+                if (vessel?.patchedConicSolver?.maneuverNodes?.Count > 0)
                 {
-                    Debug.Log("AutoPilot.OnUpdate", "active = " + active);
-                    if (!active)
-                    {
-                        active = true;
+                    ((UI_Toggle)Fields["autoPilot"].uiControlFlight).disabledText = "<color=#00FF00>Ready</color>";
+                    fixToggle = true;
 
-                        Debug.Log("AutoPilot.OnUpdate", "track = " + track);
-                        if (track)
+                    Debug.Log("AutoPilot.OnUpdate", "autoPilot = " + autoPilot);
+                    if (autoPilot)
+                    {
+                        Debug.Log("AutoPilot.OnUpdate", "active = " + active);
+                        if (!active)
                         {
-                            vessel.ActionGroups.SetGroup(KSPActionGroup.SAS, true);
-                            vessel.Autopilot.Enable(VesselAutopilot.AutopilotMode.Maneuver);
+                            active = true;
+
+                            Debug.Log("AutoPilot.OnUpdate", "track = " + track);
+                            if (track)
+                            {
+                                vessel.ActionGroups.SetGroup(KSPActionGroup.SAS, true);
+                                vessel.Autopilot.Enable(VesselAutopilot.AutopilotMode.Maneuver);
+                            }
+                        }
+                        else
+                        {
+                            var maneuver = vessel.patchedConicSolver.maneuverNodes[0];
+
+                            Debug.Log("AutoPilot.OnUpdate", "burn = " + burn + ", startBurnIn = " + maneuver?.startBurnIn + ", ignition = " + ignition);
+                            if (!burn && maneuver.startBurnIn < ignition)
+                            {
+                                burn = true;
+                                dV = maneuver.GetPartialDv().magnitude;
+                                UT = (float)Planetarium.GetUniversalTime();
+
+                                ((UI_Toggle)Fields["autoPilot"].uiControlFlight).enabledText = "<color=#FF8000>Burn</color>";
+                                fixToggle = true;
+                            }
+
+                            Debug.Log("AutoPilot.OnUpdate", "burn = " + burn + ", dV = " + dV + ", UT = " + UT);
+                            if (burn)
+                            {
+                                double dT = Planetarium.GetUniversalTime() - UT;
+
+                                Debug.Log("AutoPilot.OnUpdate", "old UT = " + UT);
+                                Debug.Log("AutoPilot.OnUpdate", "new UT = " + (UT + dT));
+                                Debug.Log("AutoPilot.OnUpdate", "dT = " + dT);
+                                if (dT > 0)
+                                {
+                                    double ddV = maneuver.GetPartialDv().magnitude - dV;
+
+                                    Debug.Log("AutoPilot.OnUpdate", "old dV = " + dV);
+                                    Debug.Log("AutoPilot.OnUpdate", "new dV = " + (dV + ddV));
+                                    Debug.Log("AutoPilot.OnUpdate", "ddV = " + ddV);
+                                    if (ddV > 1e-9)
+                                    {
+                                        Debug.Log("AutoPilot.OnUpdate", "ddV increased, current maneuver node is completed.");
+                                        Debug.Log("AutoPilot.OnUpdate", "multinode = " + multinode + ", maneuver nodes count = " + vessel?.patchedConicSolver?.maneuverNodes?.Count);
+                                        if (multinode && vessel.patchedConicSolver.maneuverNodes.Count > 1)
+                                        {
+                                            vessel.patchedConicSolver.RemoveManeuverNode(maneuver);
+                                            Debug.Log("AutoPilot.OnUpdate", "Removed maneuver node.");
+                                        }
+                                        else
+                                        {
+                                            autoPilot = false;
+                                            Debug.Log("AutoPilot.OnUpdate", "Last maneuver node, turn off autopilot.");
+                                        }
+
+                                        if (precise || overshoot > 0.3)
+                                        {
+                                            Reset();
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            overshoot += dT;
+                                        }
+                                    }
+
+                                    dV += ddV;
+                                    UT += dT;
+
+                                    Debug.Log("AutoPilot.OnUpdate", "slow = " + slow);
+                                    if (!slow)
+                                    {
+                                        Debug.Log("AutoPilot.OnUpdate", "ddV = " + ddV + ", [(dV + ddV) / -ddV * dT] = " + ((dV + ddV) / -ddV * dT) + ", cutOff = " + cutOff + ", throttle = " + throttle);
+                                        if (ddV < 0 && (dV + ddV) / -ddV * dT < cutOff)
+                                        {
+                                            slow = true;
+                                            Debug.Log("AutoPilot.OnUpdate", "Start slowing down.");
+                                        }
+
+                                        else
+
+                                        if (throttle < 1)
+                                        {
+                                            Debug.Log("AutoPilot.OnUpdate", "Increase throttle by " + (dT / ignition));
+                                            throttle += dT / ignition;
+                                            if (throttle > 1)
+                                                throttle = 1;
+                                            Debug.Log("AutoPilot.OnUpdate", "new throttle = " + throttle);
+                                        }
+                                    }
+
+                                    Debug.Log("AutoPilot.OnUpdate", "precise = " + precise);
+                                    if (precise)
+                                    {
+                                        Debug.Log("AutoPilot.OnUpdate", "slow = " + slow + ", throttle = " + throttle);
+                                        if (slow && throttle > 0.05)
+                                        {
+                                            Debug.Log("AutoPilot.OnUpdate", "Decrease throttle by " + (dT / (cutOff * 2)));
+                                            throttle -= dT / (cutOff * 2);
+                                            if (throttle < 0.05)
+                                                throttle = 0.05;
+                                            Debug.Log("AutoPilot.OnUpdate", "new throttle = " + throttle);
+                                        }
+                                    }
+
+                                    FlightInputHandler.state.mainThrottle = (float)throttle;
+                                }
+                            }
                         }
                     }
                     else
                     {
-                        var maneuver = vessel.patchedConicSolver.maneuverNodes[0];
-
-                        Debug.Log("AutoPilot.OnUpdate", "burn = " + burn + ", startBurnIn = " + maneuver?.startBurnIn + ", ignition = " + ignition);
-                        if (!burn && maneuver.startBurnIn < ignition)
+                        Debug.Log("AutoPilot.OnUpdate", "active = " + active);
+                        if (active)
                         {
-                            burn = true;
-                            dV = maneuver.GetPartialDv().magnitude;
-                            UT = (float)Planetarium.GetUniversalTime();
-                        }
-
-                        Debug.Log("AutoPilot.OnUpdate", "burn = " + burn + ", dV = " + dV + ", UT = " + UT);
-                        if (burn)
-                        {
-                            double dT = Planetarium.GetUniversalTime() - UT;
-
-                            Debug.Log("AutoPilot.OnUpdate", "old UT = " + UT);
-                            Debug.Log("AutoPilot.OnUpdate", "new UT = " + (UT + dT));
-                            Debug.Log("AutoPilot.OnUpdate", "dT = " + dT);
-                            if (dT > 0)
-                            {
-                                double ddV = maneuver.GetPartialDv().magnitude - dV;
-
-                                Debug.Log("AutoPilot.OnUpdate", "old dV = " + dV);
-                                Debug.Log("AutoPilot.OnUpdate", "new dV = " + (dV + ddV));
-                                Debug.Log("AutoPilot.OnUpdate", "ddV = " + ddV);
-                                if (ddV > 1e-9)
-                                {
-                                    Debug.Log("AutoPilot.OnUpdate", "ddV increased, current maneuver node is completed.");
-                                    Debug.Log("AutoPilot.OnUpdate", "multinode = " + multinode + ", maneuver nodes count = " + vessel?.patchedConicSolver?.maneuverNodes?.Count);
-                                    if (multinode && vessel.patchedConicSolver.maneuverNodes.Count > 1)
-                                    {
-                                        vessel.patchedConicSolver.RemoveManeuverNode(maneuver);
-                                        Debug.Log("AutoPilot.OnUpdate", "Removed maneuver node.");
-                                    }
-                                    else
-                                    {
-                                        autoPilot = false;
-                                        Debug.Log("AutoPilot.OnUpdate", "Last maneuver node, turn off autopilot.");
-                                    }
-
-                                    if (precise || overshoot > 0.25)
-                                    {
-                                        Reset();
-                                        return;
-                                    }
-                                    else
-                                    {
-                                        overshoot += dT;
-                                    }
-                                }
-
-                                dV += ddV;
-                                UT += dT;
-
-                                Debug.Log("AutoPilot.OnUpdate", "slow = " + slow);
-                                if (!slow)
-                                {
-                                    Debug.Log("AutoPilot.OnUpdate", "ddV = " + ddV + ", [(dV + ddV) / -ddV * dT] = " + ((dV + ddV) / -ddV * dT) + ", cutOff = " + cutOff + ", throttle = " + throttle);
-                                    if (ddV < 0 && (dV + ddV) / -ddV * dT < cutOff)
-                                    {
-                                        slow = true;
-                                        Debug.Log("AutoPilot.OnUpdate", "Start slowing down.");
-                                    }
-
-                                    else
-
-                                    if (throttle < 1)
-                                    {
-                                        Debug.Log("AutoPilot.OnUpdate", "Increase throttle by " + (dT / ignition));
-                                        throttle += dT / ignition;
-                                        if (throttle > 1)
-                                            throttle = 1;
-                                        Debug.Log("AutoPilot.OnUpdate", "new throttle = " + throttle);
-                                    }
-                                }
-
-                                Debug.Log("AutoPilot.OnUpdate", "precise = " + precise);
-                                if (precise)
-                                {
-                                    Debug.Log("AutoPilot.OnUpdate", "slow = " + slow + ", throttle = " + throttle);
-                                    if (slow && throttle > 0.05)
-                                    {
-                                        Debug.Log("AutoPilot.OnUpdate", "Decrease throttle by " + (dT / (cutOff * 2)));
-                                        throttle -= dT / (cutOff * 2);
-                                        if (throttle < 0.05)
-                                            throttle = 0.05;
-                                        Debug.Log("AutoPilot.OnUpdate", "new throttle = " + throttle);
-                                    }
-                                }
-
-                                FlightInputHandler.state.mainThrottle = (float)throttle;
-                            }
+                            Reset();
                         }
                     }
                 }
                 else
                 {
+                    if (autoPilot)
+                    {
+                        autoPilot = false;
+                        Debug.Log("AutoPilot.OnUpdate", "No maneuver nodes, turn off autopilot");
+                    }
+
                     Debug.Log("AutoPilot.OnUpdate", "active = " + active);
                     if (active)
                     {
                         Reset();
+                        return;
+                    }
+
+                    if (fixToggle)
+                    {
+                        FixToggle();
                     }
                 }
             }
