@@ -1,3 +1,8 @@
-**v0.1.0**
+This is the first alpha release, it is intended as a preview to allow testing of some features.
 
-- First Beta Release
+The features included in this version are:
+
+- Train kerbals in the astronaut complex choosing between two specializations
+- Available Specializations
+  > Pilot specialization 1: Automatic Maneuver Execution
+  > Pilot specialization 2: Remote Control Probes
