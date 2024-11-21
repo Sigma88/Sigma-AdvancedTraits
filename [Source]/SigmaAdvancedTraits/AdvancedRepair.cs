@@ -106,7 +106,7 @@ namespace SigmaAdvancedTraitsPlugin
                             if (broken != null && prefab != null)
                             {
                                 // Delete breakObjects
-                                FieldInfo MDP_breakObjects = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Skip(3).FirstOrDefault();
+                                FieldInfo MDP_breakObjects = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(mdp => mdp.Name == "breakObjects");
                                 Debug.Log("Repair", "MDP_breakObjects.Name = " + MDP_breakObjects?.Name + ", should be = breakObjects");
 
                                 List<GameObject> oldBreakObjects = (List<GameObject>)MDP_breakObjects?.GetValue(MDP);
@@ -141,7 +141,7 @@ namespace SigmaAdvancedTraitsPlugin
 
 
                                 // Reset secondaryTransform
-                                FieldInfo MDP_secondaryTransform = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault();
+                                FieldInfo MDP_secondaryTransform = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(mdp => mdp.Name == "secondaryTransform");
                                 Debug.Log("Repair", "MDP_secondaryTransform.Name = " + MDP_secondaryTransform?.Name + ", should be = secondaryTransform");
 
                                 Transform secondaryTransform = part?.FindModelTransform(MDP.secondaryTransformName);
@@ -184,7 +184,7 @@ namespace SigmaAdvancedTraitsPlugin
                                 Debug.Log("Repair", "MDP.useAnimation = " + MDP.useAnimation);
                                 if (MDP.useAnimation)
                                 {
-                                    FieldInfo MDP_anim = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Skip(1).FirstOrDefault();
+                                    FieldInfo MDP_anim = typeof(ModuleDeployablePart).GetFields(BindingFlags.NonPublic | BindingFlags.Instance).FirstOrDefault(mdp => mdp.Name == "anim");
                                     Debug.Log("Repair", "MDP_anim.Name = " + MDP_anim?.Name + ", should be = anim");
                                     MDP_anim.SetValue(MDP, part.GetComponentInChildren<Animation>(true));
 
