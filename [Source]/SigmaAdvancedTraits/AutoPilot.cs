@@ -225,11 +225,13 @@ namespace SigmaAdvancedTraitsPlugin
                             var maneuver = vessel.patchedConicSolver.maneuverNodes[0];
 
                             Debug.Log("AutoPilot.OnUpdate", "burn = " + burn + ", startBurnIn = " + maneuver?.startBurnIn + ", ignition = " + ignition);
-                            if (!burn && maneuver.startBurnIn < ignition)
+                            if (!burn && maneuver.startBurnIn <= ignition)
                             {
+                                TimeWarp.SetRate(0, true, true);
+
                                 burn = true;
                                 dV = maneuver.GetPartialDv().magnitude;
-                                UT = (float)Planetarium.GetUniversalTime();
+                                UT = Planetarium.GetUniversalTime();
 
                                 ((UI_Toggle)Fields["autoPilot"].uiControlFlight).enabledText = "<color=#FF8000>Burn</color>";
                                 fixToggle = true;
