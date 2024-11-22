@@ -68,10 +68,10 @@ namespace SigmaAdvancedTraitsPlugin
                 {
                     // Scientist Trait 0 Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#55BADA>AdvTraits[\"Scientist\"][0]</color>",
+                    "<color=#55BADA>Scientist0</color>",
                     // Scientist Trait 1 Tooltip
                     "<size=10><color=#FFFFFF>Advanced Training in</size></color>\n" +
-                    "<color=#55BADA>AdvTraits[\"Scientist\"][1]</color>"
+                    "<color=#55BADA>Scientist1</color>"
                 }
             }
         };
