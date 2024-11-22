@@ -40,7 +40,10 @@ namespace SigmaAdvancedTraitsPlugin
         void OnVesselChange(Vessel vessel)
         {
             Debug.Log("FlightEvents.OnVesselChange", "vessel = " + vessel);
-            FixPAWs(vessel);
+            //FixPAWs(vessel);
+
+            foreach (var item in FlightGlobals.Vessels)
+                FixPAWs(item);
         }
 
         void AddColliders(Vessel vessel)
